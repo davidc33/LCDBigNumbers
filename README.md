@@ -27,7 +27,7 @@ Available as [Arduino library "LCDBigNumbers"](https://www.arduinolibraries.info
 <br/>
 
 # Features
-- *The SerLCD branch of this fork adds support for the SparkFun_SerLCD_Arduino_Library.*
+- *The SerLCD branch of this fork adds support for the SparkFun_SerLCD_Arduino_Library. Note that these changes are still under development. It builds, but has not been tested.*
 - **10 different fonts available. From 1x2 up to 3x4.**.
 - Support for special big characters `-`, `.` and `:`.
 - Fonts which require no gap between numbers (1x2 and 3x2, variant 2 and 3) are printed by default without this gap.

@@ -27,6 +27,7 @@ Available as [Arduino library "LCDBigNumbers"](https://www.arduinolibraries.info
 <br/>
 
 # Features
+- *The SerLCD branch of this fork adds support for the SparkFun_SerLCD_Arduino_Library.*
 - **10 different fonts available. From 1x2 up to 3x4.**.
 - Support for special big characters `-`, `.` and `:`.
 - Fonts which require no gap between numbers (1x2 and 3x2, variant 2 and 3) are printed by default without this gap.
@@ -118,6 +119,7 @@ Modify them by enabling / disabling them, or change the values if applicable.
 |-|-:|-|
 | `USE_PARALLEL_2004_LCD` `USE_PARALLEL_1602_LCD` | USE_PARALLEL_2004_LCD is default | Use parallel 6 or 10 wire LCD connection with the [Arduino LiquidCrystal library](http://www.arduino.cc/en/Reference/LiquidCrystal). |
 | `USE_SERIAL_2004_LCD` `USE_SERIAL_1602_LCD` | not defined | Use serial 4 wire LCD connection provided by the [LiquidCrystal_I2C library](https://github.com/marcoschwartz/LiquidCrystal_I2C). |
+| `USE_SERLCD_2004_LCD` `USE_SERLCD_1602_LCD` | not defined | Use I2C or QWIIC connection provided by the [SparkFun_SerLCD_Arduino_Library](https://github.com/sparkfun/SparkFun_SerLCD_Arduino_Library). |
 
 # Why *.hpp instead of *.cpp?
 **Every \*.cpp file is compiled separately** by a call of the compiler exclusively for this cpp file. These calls are managed by the IDE / make system.
@@ -137,6 +139,9 @@ Every other extension e.g. *cinclude* would do, but *hpp* seems to be common sen
 <br/>
 
 # Revision History
+### Version 1.2.3.1
+- Added support for SparkFun_SerLCD_Arduino_Library
+
 ### Version 1.2.3
 - Fixed bug in clearing the gap between numbers.
 

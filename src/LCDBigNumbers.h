@@ -35,15 +35,22 @@
 #define ONE_COLUMN_HYPHEN_CHARACTER      '_' // This input character is printed as a one column hyphen. Normal hyphen / minus are printed as a hyphen with the width of the number - 1.
 #define ONE_COLUMN_HYPHEN_STRING         "_" // This input string is printed as a one column hyphen. Normal hyphen / minus are printed as a hyphen with the width of the number - 1.
 
-#if !defined(USE_PARALLEL_2004_LCD) && !defined(USE_PARALLEL_1602_LCD) && !defined(USE_SERIAL_2004_LCD) && !defined(USE_SERIAL_1602_LCD)
+#if !defined(USE_PARALLEL_2004_LCD) && !defined(USE_PARALLEL_1602_LCD) && !defined(USE_SERIAL_2004_LCD) && !defined(USE_SERIAL_1602_LCD) && !defined(USE_SERLCD_2004_LCD) && !defined(USE_SERLCD_1602_LCD)
 #define USE_PARALLEL_2004_LCD    // Use parallel 2004 LCD as default
 #endif
 
 #if defined(USE_PARALLEL_2004_LCD) || defined(USE_PARALLEL_1602_LCD)
-#define USE_PARALLEL_LCD
-#include <LiquidCrystal.h>
+#  define USE_PARALLEL_LCD
+#  include <LiquidCrystal.h>
 #else
-#include "LiquidCrystal_I2C.h"  // Use an up to date library version which has the init method
+#  if defined (USE_SERIAL_2004_LCD) || defined(USE_SERIAL_1602_LCD)
+#    define USE_SERIAL_LCD
+#    include "LiquidCrystal_I2C.h"  // Use an up to date library version which has the init method
+#  else
+#    define USE_SERLCD_LCD
+#    define LCD_SETCGRAMADDR 0x40 // SerLCD.h does not provide this command definition
+#    include "SerLCD.h"
+#  endif
 #endif
 
 #define COLUMN_MASK     0x0C // Number of columns = shifted masked value + 1
@@ -67,7 +74,11 @@ public:
 #if defined(USE_PARALLEL_LCD)
     LiquidCrystal *LCD;
 #else
+#  if defined (USE_SERIAL_LCD)
     LiquidCrystal_I2C *LCD;
+#  else
+    SerLCD *LCD;
+#  endif
 #endif
     const uint8_t NumberWidth;
     const uint8_t NumberHeight;
@@ -83,7 +94,11 @@ public:
 #if defined(USE_PARALLEL_LCD)
     LCDBigNumbers(LiquidCrystal *aLCD, const uint8_t aBigNumberFontIdentifier);
 #else
+#  if defined(USE_SERIAL_LCD)
     LCDBigNumbers(LiquidCrystal_I2C *aLCD, const uint8_t aBigNumberFontIdentifier);
+#  else
+    LCDBigNumbers(SerLCD *aLCD, const uint8_t aBigNumberFontIdentifier);
+#  endif  
 #endif
 
     //createChar with PROGMEM input
@@ -103,13 +118,21 @@ public:
 #if defined(USE_PARALLEL_LCD)
 void printSpaces(LiquidCrystal *aLCD, uint_fast8_t aNumberOfSpacesToPrint);
 #else
+#  if defined(USE_SERIAL_LCD)  
 void printSpaces(LiquidCrystal_I2C *aLCD, uint_fast8_t aNumberOfSpacesToPrint);
+#  else
+void printSpaces(SerLCD *aLCD, uint_fast8_t aNumberOfSpacesToPrint);
+#  endif
 #endif
 
 #if defined(USE_PARALLEL_LCD)
 void clearLine(LiquidCrystal *aLCD, uint_fast8_t aLineNumber);
 #else
+#  if defined(USE_SERIAL_LCD)  
 void clearLine(LiquidCrystal_I2C *aLCD, uint_fast8_t aLineNumber);
+#  else
+void clearLine(SerLCD *aLCD, uint_fast8_t aLineNumber);
+#  endif
 #endif
 
 /*
@@ -118,7 +141,11 @@ void clearLine(LiquidCrystal_I2C *aLCD, uint_fast8_t aLineNumber);
 #if defined(USE_PARALLEL_LCD)
 size_t printHex(LiquidCrystal *aLCD, uint16_t aHexByteValue);
 #else
+#  if defined(USE_SERIAL_LCD)
 size_t printHex(LiquidCrystal_I2C *aLCD, uint16_t aHexByteValue);
+#  else
+size_t printHex(SerLCD *aLCD, uint16_t aHexByteValue);
+#  endif
 #endif
 
 /*
@@ -128,20 +155,32 @@ size_t printHex(LiquidCrystal_I2C *aLCD, uint16_t aHexByteValue);
 #if defined(USE_PARALLEL_LCD)
 void showSpecialCharacters(LiquidCrystal *aLCD);
 #else
+#  if defined(USE_SERIAL_LCD)  
 void showSpecialCharacters(LiquidCrystal_I2C *aLCD);
+#  else
+void showSpecialCharacters(SerLCD *aLCD);
+#  endif
 #endif
 
 
 #if defined(USE_PARALLEL_LCD)
 void showCustomCharacters(LiquidCrystal *aLCD);
 #else
+#  if defined(USE_SERIAL_LCD)
 void showCustomCharacters(LiquidCrystal_I2C *aLCD);
+#  else
+void showCustomCharacters(SerLCD *aLCD);
+#  endif
 #endif
 
 #if defined(USE_PARALLEL_LCD)
 void testBigNumbers(LiquidCrystal *aLCD);
 #else
+#  if defined(USE_SERIAL_LCD)
 void testBigNumbers(LiquidCrystal_I2C *aLCD);
+#  else
+void testBigNumbers(SerLCD *aLCD);
+#  endif
 #endif
 
 #endif // _LCD_BIG_NUMBERS_H

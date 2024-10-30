@@ -53,39 +53,32 @@
 //#define USE_SERIAL_2004_LCD
 //#define USE_SERIAL_1602_LCD
 
+// Default USE_ selection
 #if !defined(USE_PARALLEL_2004_LCD) && !defined(USE_PARALLEL_1602_LCD) && !defined(USE_SERIAL_2004_LCD) && !defined(USE_SERIAL_1602_LCD) && !defined(USE_SERLCD_2004_LCD) && !defined(USE_SERLCD_1602_LCD)
 #define USE_PARALLEL_2004_LCD    // Use parallel 2004 LCD as default
 #endif
 
+// Set defines and include headers based on USE_*_LCD
 #if defined(USE_PARALLEL_2004_LCD) || defined(USE_PARALLEL_1602_LCD)
-#  if defined(USE_PARALLEL_2004_LCD)
-#    define LCD_COLUMNS     20
-#    define LCD_ROWS        4
-#  else
-#    define LCD_COLUMNS     16
-#    define LCD_ROWS        2
-#  endif
 #  define USE_PARALLEL_LCD
 #  include <LiquidCrystal.h>
-#else
-#  if defined(USE_SERIAL_2004_LCD) || defined(USE_SERLCD_2004_LCD)
-#    define LCD_COLUMNS     20
-#    define LCD_ROWS        4
-#  else
-#    define LCD_COLUMNS     16
-#    define LCD_ROWS        2
-#  endif
+#elif defined(USE_SERIAL_2004_LCD) || defined(USE_SERIAL_1602_LCD)
+#  define USE_SERIAL_LCD
+#  include "LiquidCrystal_I2C.h"  // Use an up to date library version which has the init method
+#elif defined(USE_SERLCD_2004_LCD) || defined(USE_SERLCD_1602_LCD)
+#  define USE_SERLCD_LCD
+#  define LCD_SETCGRAMADDR 0x40 // SerLCD.h does not provide this command.
+#  include "SerLCD.h"
+#endif
 
-#  if defined (USE_SERIAL_2004_LCD) || defined(USE_SERIAL_1602_LCD)
-#    define USE_SERIAL_LCD
-#    include "LiquidCrystal_I2C.h"  // Use an up to date library version which has the init method
-#  else
-#    define USE_SERLCD_LCD
-#    define LCD_SETCGRAMADDR 0x40 // SerLCD.h does not provide this command.
-#    include "SerLCD.h"
-#  endif
-
-#endif // defined(USE_PARALLEL_2004_LCD) || defined(USE_PARALLEL_1602_LCD)
+// Set num columns and rows based on USE_*_LCD
+#if defined(USE_PARALLEL_2004_LCD) || defined(USE_SERIAL_2004_LCD) || defined(USE_SERLCD_2004_LCD)
+#  define LCD_COLUMNS     20
+#  define LCD_ROWS        4
+#elif defined(USE_PARALLEL_1602_LCD) || defined(USE_SERIAL_1602_LCD) || defined(USE_SERLCD_1602_LCD)
+#  define LCD_COLUMNS     16
+#  define LCD_ROWS        2
+#endif
 
 #define DEFAULT_TEST_DELAY  3000
 #define NUMBER_OF_SPECIAL_CHARACTERS_IN_FONT_ARRAY  3
@@ -300,13 +293,11 @@ public:
     virtual ~LCDBigNumbers(){}
 #if defined(USE_PARALLEL_LCD)
     LiquidCrystal *LCD;
-#else
-#  if defined (USE_SERIAL_LCD)
+#elif defined (USE_SERIAL_LCD)
     LiquidCrystal_I2C *LCD;
-#  else
+#elif defined (USE_SERLCD_LCD)
     SerLCD *LCD;
-#  endif
-#endif // defined(USE_PARALLEL_LCD)
+#endif
 
     uint8_t NumberWidth; // Width of the rendered number not including the optional blank gap
     uint8_t NumberHeight;
@@ -422,12 +413,10 @@ public:
 
 #if defined(USE_PARALLEL_LCD)
     LCDBigNumbers(LiquidCrystal *aLCD, const uint8_t aBigNumberFontIdentifier) :
-#else
-#  if defined(USE_SERIAL_LCD)
+#elif defined (USE_SERIAL_LCD)
     LCDBigNumbers(LiquidCrystal_I2C *aLCD, const uint8_t aBigNumberFontIdentifier) :
-#  else
+#elif defined (USE_SERLCD_LCD)
     LCDBigNumbers(SerLCD *aLCD, const uint8_t aBigNumberFontIdentifier) :
-#  endif  
 #endif
                     LCD(aLCD) {
         init(aBigNumberFontIdentifier);
@@ -571,12 +560,10 @@ public:
 
 #if defined(USE_PARALLEL_LCD)
 void printSpaces(LiquidCrystal *aLCD, uint_fast8_t aNumberOfSpacesToPrint)
-#else
-#  if defined(USE_SERIAL_LCD)  
+#elif defined (USE_SERIAL_LCD)
 void printSpaces(LiquidCrystal_I2C *aLCD, uint_fast8_t aNumberOfSpacesToPrint)
-#  else
+#elif defined (USE_SERLCD_LCD)
 void printSpaces(SerLCD *aLCD, uint_fast8_t aNumberOfSpacesToPrint)
-#  endif
 #endif
         {
     for (uint_fast8_t i = 0; i < aNumberOfSpacesToPrint; ++i) {
@@ -586,12 +573,10 @@ void printSpaces(SerLCD *aLCD, uint_fast8_t aNumberOfSpacesToPrint)
 
 #if defined(USE_PARALLEL_LCD)
 void clearLine(LiquidCrystal *aLCD, uint_fast8_t aLineNumber)
-#else
-#  if defined(USE_SERIAL_LCD)  
+#elif defined (USE_SERIAL_LCD)
 void clearLine(LiquidCrystal_I2C *aLCD, uint_fast8_t aLineNumber)
-#  else
+#elif defined (USE_SERLCD_LCD)
 void clearLine(SerLCD *aLCD, uint_fast8_t aLineNumber)
-#  endif
 #endif
         {
     aLCD->setCursor(0, aLineNumber);
@@ -601,12 +586,10 @@ void clearLine(SerLCD *aLCD, uint_fast8_t aLineNumber)
 
 #if defined(USE_PARALLEL_LCD)
 size_t printHex(LiquidCrystal *aLCD, uint16_t aHexByteValue)
-#else
-#  if defined(USE_SERIAL_LCD)  
+#elif defined (USE_SERIAL_LCD)
 size_t printHex(LiquidCrystal_I2C *aLCD, uint16_t aHexByteValue)
-#  else
+#elif defined (USE_SERLCD_LCD)
 size_t printHex(SerLCD *aLCD, uint16_t aHexByteValue)
-#  endif
 #endif
         {
     aLCD->print(F("0x"));
@@ -624,13 +607,11 @@ size_t printHex(SerLCD *aLCD, uint16_t aHexByteValue)
  */
 #if defined(USE_PARALLEL_LCD)
 void showSpecialCharacters(LiquidCrystal *aLCD)
-#else
-#  if defined(USE_SERIAL_LCD)  
+#elif defined (USE_SERIAL_LCD)
 void showSpecialCharacters(LiquidCrystal_I2C *aLCD)
-#  else
+#elif defined (USE_SERLCD_LCD)
 void showSpecialCharacters(SerLCD *aLCD)
 #  endif
-#endif
         {
     aLCD->setCursor(0, 0);
     // 0 to 7 are mirrored to 8 to 15 as described in datasheet
@@ -664,12 +645,10 @@ void showSpecialCharacters(SerLCD *aLCD)
 
 #if defined(USE_PARALLEL_LCD)
 void showCustomCharacters(LiquidCrystal *aLCD)
-#else
-#  if defined(USE_SERIAL_LCD)
+#elif defined (USE_SERIAL_LCD)
 void showCustomCharacters(LiquidCrystal_I2C *aLCD)
-#  else
+#elif defined (USE_SERLCD_LCD)
 void showCustomCharacters(SerLCD *aLCD)
-#  endif
 #endif
         {
     aLCD->setCursor(0, 0);
@@ -683,12 +662,10 @@ void showCustomCharacters(SerLCD *aLCD)
  * Print all fonts, used in screenshots, using one object
  */
 void testBigNumbers(LiquidCrystal *aLCD)
-#else
-#  if defined(USE_SERIAL_LCD)
+#elif defined (USE_SERIAL_LCD)
 void testBigNumbers(LiquidCrystal_I2C *aLCD)
-#  else
+#elif defined (USE_SERLCD_LCD)
 void testBigNumbers(SerLCD *aLCD)
-#  endif
 #endif
         {
     /*
